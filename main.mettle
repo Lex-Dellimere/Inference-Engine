@@ -1,5 +1,5 @@
-import "./IEngine";
-import "./example.mettle";
+import "./IEngine/IEngine";
+import "./IEngine/rule_presets";
 import "std/io";
 
 fn main() -> int32 {
@@ -26,10 +26,44 @@ fn main() -> int32 {
    add_family_rules();
 
    set_trace_inference(0);
-
    run_forward_chaining();
 
-   display_relationships();
+
+   // raw dump of working memory
+   // display_working_memory();
+
+   // grouped relationships by type
+   // display_relationships();
+
+   // human‑readable
+   println("--- Readable Relationships ---");
+   var i: int32 = 0;
+   while (i < return_wm_count) {
+       print("  ");
+       print_fact_readable(return_wm_at(i));
+       i += 1;
+   }
+
+   // focus on a single person
+   // display_relationships_for("alice");
+   display_relationships_for("bob");
+
+   // family tree
+   // println("");
+   // println("Family Tree (descendants of alice):");
+   // print_descendants("alice", 0);
+
+   // query examples "" as wildcard
+   // query("grandparent", "alice", "");
+   // query("grandchild", "", "alice");
+   query("cousin", "carol", "");
+
+   // will display the counts of each relation ship
+   // display_counts();
+
+   println("");
+   println("Complete Family Trees:");
+   print_all_family_trees();
 
    return 0;
 }

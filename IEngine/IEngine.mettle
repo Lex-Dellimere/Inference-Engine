@@ -219,7 +219,9 @@ fn match_rule(rule: Rule*, cond_idx: int32, current: Binding*, solutions: Bindin
          }
          b += 1;
       }
+
       var j: int32 = 0;
+
       while (j < wm_count) {
          var binding_copy: Binding;
          var d2: int32 = 0;
@@ -228,12 +230,15 @@ fn match_rule(rule: Rule*, cond_idx: int32, current: Binding*, solutions: Bindin
             binding_copy.values[d2] = current->values[d2];
             d2 += 1;
          }
+
          binding_copy.count = current->count;
          if (unify_pattern(&inner_pattern, &wm[j], &binding_copy)) {
             return;
          }
+
          j += 1;
       }
+
       match_rule(rule, cond_idx + 1, current, solutions, sol_count);
       return;
    }
@@ -284,13 +289,49 @@ fn instantiate_action(action: AtomPattern*, binding: Binding*) -> Fact {
    return fact;
 }
 
+export fn return_wm_count() -> int32 {
+   return wm_count;
+}
+
+export fn return_wm_at(at_position: int32) -> Fact* {
+    return &wm[at_position];
+}
+
 var trace_inference: int32 = 0;
+
+fn has_parent(name: string) -> int32 {
+   var i: int32 = 0;
+   while (i < wm_count) {
+      if (wm[i].predicate == "parent" &&
+          wm[i].arity == 2 &&
+          wm[i].args[1] == name) {
+         return 1;
+      }
+      i += 1;
+   }
+   return 0;
+}
+
+// API SIDE
 
 export fn set_trace_inference(val: int32) -> void {
    trace_inference = val;
 }
 
-// API SIDE
+fn print_count(pred: string, label: string) -> void {
+   var cnt: int32 = 0;
+   var i: int32 = 0;
+   while (i < wm_count) {
+      if (wm[i].predicate == pred) {
+         cnt += 1;
+      }
+      i += 1;
+   }
+   print(label);
+   print(": ");
+   print_int(cnt);
+   print("\n");
+}
 
 export fn run_forward_chaining() -> void {
    var added: int32 = 1;
@@ -340,8 +381,6 @@ export fn run_forward_chaining() -> void {
    }
 }
 
-// display
-
 export fn display_working_memory() -> void {
    println("");
    println("Final working memory:");
@@ -390,6 +429,8 @@ export fn print_predicate_group(pred: string, label: string) -> void {
       println("  (none)");
    }
 }
+
+
 
 export fn display_relationships() -> void {
    println("");
@@ -443,6 +484,324 @@ export fn display_relationships() -> void {
    print_predicate_group("stepson", "Stepsons");
    print_predicate_group("stepmother", "Stepmothers");
    print_predicate_group("stepfather", "Stepfathers");
+}
+
+fn print_children(parent: string, prefix: string) -> void {
+   var child_count: int32 = 0;
+   var i: int32 = 0;
+
+   while (i < wm_count) {
+      if (wm[i].predicate == "parent" &&
+          wm[i].arity == 2 &&
+          wm[i].args[0] == parent) {
+         child_count += 1;
+      }
+      i += 1;
+   }
+
+   var idx: int32 = 0;
+   i = 0;
+   while (i < wm_count) {
+      if (wm[i].predicate == "parent" &&
+          wm[i].arity == 2 &&
+          wm[i].args[0] == parent) {
+
+         var child: string = wm[i].args[1];
+         var is_last: int32 = 0;
+         if (idx == child_count - 1) {
+            is_last = 1;
+         }
+
+         print(prefix);
+         if (is_last == 1) {
+            print("└── ");
+         } else {
+            print("├── ");
+         }
+         println(child);
+
+         var new_prefix: string = prefix;
+         if (is_last == 1) {
+            new_prefix = new_prefix + "    ";
+         } else {
+            new_prefix = new_prefix + "│   ";
+         }
+
+         print_children(child, new_prefix);
+
+         idx += 1;
+      }
+      i += 1;
+   }
+}
+
+export fn print_descendants(root: string, depth: int32) -> void {
+   println(root);
+   var prefix: string = "";
+   print_children(root, prefix);
+}
+
+export fn query(predicate: string, arg1: string, arg2: string) -> void {
+   println("");
+   print("Query: ");
+   print(predicate);
+   print("(");
+   print(arg1);
+   print(", ");
+   print(arg2);
+   println(")");
+
+   var i: int32 = 0;
+   var found: int32 = 0;
+   while (i < wm_count) {
+      if (wm[i].predicate == predicate && wm[i].arity == 2) {
+         var a_match: int32 = 1;
+         if (arg1 != "" && wm[i].args[0] != arg1) {
+            a_match = 0;
+         }
+         if (arg2 != "" && wm[i].args[1] != arg2) {
+            a_match = 0;
+         }
+         if (a_match) {
+            print("  ");
+            print_fact_readable(&wm[i]);
+            println("");
+            found = 1;
+         }
+      }
+      i += 1;
+   }
+
+   if (!found) {
+      println("  No results.");
+   }
+}
+
+export fn display_relationships_for(name: string) -> void {
+   println("");
+   print("Relationships involving ");
+   println(name);
+   println(":");
+
+   var i: int32 = 0;
+   var found: int32 = 0;
+   while (i < wm_count) {
+      var f: Fact = wm[i];
+      var j: int32 = 0;
+      var has_name: int32 = 0;
+      while (j < f.arity) {
+         if (f.args[j] == name) {
+            has_name = 1;
+            break;
+         }
+         j += 1;
+      }
+      if (has_name) {
+         print("  ");
+         print_fact_readable(&f);
+         println("");
+         found = 1;
+      }
+      i += 1;
+   }
+
+   if (!found) {
+      println("  (none)");
+   }
+}
+
+export fn print_all_family_trees() -> void {
+   var roots: string[100];
+   var root_count: int32 = 0;
+
+   // Find all people who are parents but have no known parents themselves.
+   var i: int32 = 0;
+   while (i < wm_count) {
+      if (wm[i].predicate == "parent" && wm[i].arity == 2) {
+         var candidate: string = wm[i].args[0];
+
+         if (!has_parent(candidate)) {
+            // Check if candidate is already in roots.
+            var already: int32 = 0;
+            var j: int32 = 0;
+            while (j < root_count) {
+               if (roots[j] == candidate) {
+                  already = 1;
+                  break;
+               }
+               j += 1;
+            }
+
+            if (!already && root_count < 100) {
+               roots[root_count] = candidate;
+               root_count += 1;
+            }
+         }
+      }
+      i += 1;
+   }
+
+   // Print a tree for each root.
+   var r: int32 = 0;
+   while (r < root_count) {
+      println("");
+      print("Family tree for ");
+      println(roots[r]);
+      print_descendants(roots[r], 0);
+      r += 1;
+   }
+}
+
+export fn print_fact_readable(f: Fact*) -> void {
+   if (f->arity == 1) {
+      if (f->predicate == "male") {
+         print(f->args[0]);
+         println(" is male");
+      } else if (f->predicate == "female") {
+         print(f->args[0]);
+         println(" is female");
+      } else {
+         print_fact(f);
+         println("");
+      }
+      return;
+   }
+
+   if (f->arity != 2) {
+      print_fact(f);
+      println("");
+      return;
+   }
+
+   var a: string = f->args[0];
+   var b: string = f->args[1];
+
+   if (f->predicate == "parent") {
+      print(a); print(" is a parent of "); println(b);
+   } else if (f->predicate == "child") {
+      print(a); print(" is a child of "); println(b);
+   } else if (f->predicate == "mother") {
+      print(a); print(" is the mother of "); println(b);
+   } else if (f->predicate == "father") {
+      print(a); print(" is the father of "); println(b);
+   } else if (f->predicate == "son") {
+      print(a); print(" is a son of "); println(b);
+   } else if (f->predicate == "daughter") {
+      print(a); print(" is a daughter of "); println(b);
+   } else if (f->predicate == "sibling") {
+      print(a); print(" is a sibling of "); println(b);
+   } else if (f->predicate == "brother") {
+      print(a); print(" is a brother of "); println(b);
+   } else if (f->predicate == "sister") {
+      print(a); print(" is a sister of "); println(b);
+   } else if (f->predicate == "spouse") {
+      print(a); print(" is a spouse of "); println(b);
+   } else if (f->predicate == "wife") {
+      print(a); print(" is the wife of "); println(b);
+   } else if (f->predicate == "husband") {
+      print(a); print(" is the husband of "); println(b);
+   } else if (f->predicate == "grandparent") {
+      print(a); print(" is a grandparent of "); println(b);
+   } else if (f->predicate == "grandchild") {
+      print(a); print(" is a grandchild of "); println(b);
+   } else if (f->predicate == "grandmother") {
+      print(a); print(" is the grandmother of "); println(b);
+   } else if (f->predicate == "grandfather") {
+      print(a); print(" is the grandfather of "); println(b);
+   } else if (f->predicate == "granddaughter") {
+      print(a); print(" is a granddaughter of "); println(b);
+   } else if (f->predicate == "grandson") {
+      print(a); print(" is a grandson of "); println(b);
+   } else if (f->predicate == "aunt") {
+      print(a); print(" is an aunt of "); println(b);
+   } else if (f->predicate == "uncle") {
+      print(a); print(" is an uncle of "); println(b);
+   } else if (f->predicate == "niece") {
+      print(a); print(" is a niece of "); println(b);
+   } else if (f->predicate == "nephew") {
+      print(a); print(" is a nephew of "); println(b);
+   } else if (f->predicate == "cousin") {
+      print(a); print(" is a cousin of "); println(b);
+   } else if (f->predicate == "ancestor") {
+      print(a); print(" is an ancestor of "); println(b);
+   } else if (f->predicate == "descendant") {
+      print(a); print(" is a descendant of "); println(b);
+   } else if (f->predicate == "parent_in_law") {
+      print(a); print(" is a parent‑in‑law of "); println(b);
+   } else if (f->predicate == "mother_in_law") {
+      print(a); print(" is the mother‑in‑law of "); println(b);
+   } else if (f->predicate == "father_in_law") {
+      print(a); print(" is the father‑in‑law of "); println(b);
+   } else if (f->predicate == "child_in_law") {
+      print(a); print(" is a child‑in‑law of "); println(b);
+   } else if (f->predicate == "daughter_in_law") {
+      print(a); print(" is a daughter‑in‑law of "); println(b);
+   } else if (f->predicate == "son_in_law") {
+      print(a); print(" is a son‑in‑law of "); println(b);
+   } else if (f->predicate == "sibling_in_law") {
+      print(a); print(" is a sibling‑in‑law of "); println(b);
+   } else if (f->predicate == "sister_in_law") {
+      print(a); print(" is a sister‑in‑law of "); println(b);
+   } else if (f->predicate == "brother_in_law") {
+      print(a); print(" is a brother‑in‑law of "); println(b);
+   } else if (f->predicate == "stepchild") {
+      print(a); print(" is a stepchild of "); println(b);
+   } else if (f->predicate == "stepdaughter") {
+      print(a); print(" is a stepdaughter of "); println(b);
+   } else if (f->predicate == "stepson") {
+      print(a); print(" is a stepson of "); println(b);
+   } else if (f->predicate == "stepmother") {
+      print(a); print(" is the stepmother of "); println(b);
+   } else if (f->predicate == "stepfather") {
+      print(a); print(" is the stepfather of "); println(b);
+   } else {
+      print_fact(f);
+      println("");
+   }
+}
+
+export fn display_counts() -> void {
+   println("");
+   println("--- RELATIONSHIP COUNTS ---");
+   print_count("parent", "Parents");
+   print_count("child", "Children");
+   print_count("mother", "Mothers");
+   print_count("father", "Fathers");
+   print_count("son", "Sons");
+   print_count("daughter", "Daughters");
+   print_count("sibling", "Siblings");
+   print_count("brother", "Brothers");
+   print_count("sister", "Sisters");
+   print_count("spouse", "Spouses");
+   print_count("wife", "Wives");
+   print_count("husband", "Husbands");
+   print_count("grandparent", "Grandparents");
+   print_count("grandchild", "Grandchildren");
+   print_count("grandmother", "Grandmothers");
+   print_count("grandfather", "Grandfathers");
+   print_count("granddaughter", "Granddaughters");
+   print_count("grandson", "Grandsons");
+   print_count("aunt", "Aunts");
+   print_count("uncle", "Uncles");
+   print_count("niece", "Nieces");
+   print_count("nephew", "Nephews");
+   print_count("cousin", "Cousins");
+   print_count("ancestor", "Ancestors");
+   print_count("descendant", "Descendants");
+   print_count("parent_in_law", "Parents-in-law");
+   print_count("mother_in_law", "Mothers-in-law");
+   print_count("father_in_law", "Fathers-in-law");
+   print_count("child_in_law", "Children-in-law");
+   print_count("daughter_in_law", "Daughters-in-law");
+   print_count("son_in_law", "Sons-in-law");
+   print_count("sibling_in_law", "Siblings-in-law");
+   print_count("sister_in_law", "Sisters-in-law");
+   print_count("brother_in_law", "Brothers-in-law");
+   print_count("stepchild", "Stepchildren");
+   print_count("stepdaughter", "Stepdaughters");
+   print_count("stepson", "Stepsons");
+   print_count("stepmother", "Stepmothers");
+   print_count("stepfather", "Stepfathers");
 }
 
 export fn add_fact(f: Fact*) -> int32 {

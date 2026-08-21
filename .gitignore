@@ -3,8 +3,8 @@
 *.log
 tmp/
 
-main
+bin/main
 
-main.explain.base
+bin/main.explain.base
 
-main.o
+bin/main.o
