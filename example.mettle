@@ -1,0 +1,528 @@
+@inline export fn add_family_rules() -> void {
+   var parent_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]},
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "Y" },
+            { kind: 1, name: "Z" }
+         ]}
+      ],
+      action: { predicate: "grandparent", arity: 2, args: [
+         { kind: 1, name: "X" },
+         { kind: 1, name: "Z" }
+      ]}
+   };
+   add_rule(parent_example);
+
+   var child_example: Rule = {
+      cond_count: 1,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "P" },
+            { kind: 1, name: "C" }
+         ]}
+      ],
+      action: { predicate: "child", arity: 2, args: [
+         { kind: 1, name: "C" },
+         { kind: 1, name: "P" }
+      ]}
+   };
+   add_rule(child_example);
+
+   var sibling_example: Rule = {
+      cond_count: 3,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "P" },
+            { kind: 1, name: "X" }
+         ]},
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "P" },
+            { kind: 1, name: "Y" }
+         ]},
+         { predicate: "neq", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]}
+      ],
+      action: { predicate: "sibling", arity: 2, args: [
+         { kind: 1, name: "X" },
+         { kind: 1, name: "Y" }
+      ]}
+   };
+   add_rule(sibling_example);
+
+   var grandchild_example: Rule = {
+      cond_count: 1,
+      conditions: [
+         { predicate: "grandparent", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Z" }
+         ]}
+      ],
+      action: { predicate: "grandchild", arity: 2, args: [
+         { kind: 1, name: "Z" },
+         { kind: 1, name: "X" }
+      ]}
+   };
+   add_rule(grandchild_example);
+
+   var aunt_uncle_example: Rule = {
+      cond_count: 3,
+      conditions: [
+         { predicate: "sibling", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "P" }
+         ]},
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "P" },
+            { kind: 1, name: "Y" }
+         ]},
+         { predicate: "neq", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]}
+      ],
+      action: { predicate: "aunt_uncle", arity: 2, args: [
+         { kind: 1, name: "X" },
+         { kind: 1, name: "Y" }
+      ]}
+   };
+   add_rule(aunt_uncle_example);
+
+   var niece_nephew_example: Rule = {
+      cond_count: 1,
+      conditions: [
+         { predicate: "aunt_uncle", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]}
+      ],
+      action: { predicate: "niece_nephew", arity: 2, args: [
+         { kind: 1, name: "Y" },
+         { kind: 1, name: "X" }
+      ]}
+   };
+   add_rule(niece_nephew_example);
+
+   var ancestor_base_example: Rule = {
+      cond_count: 1,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]}
+      ],
+      action: { predicate: "ancestor", arity: 2, args: [
+         { kind: 1, name: "X" },
+         { kind: 1, name: "Y" }
+      ]}
+   };
+   add_rule(ancestor_base_example);
+
+   var ancestor_recursive_example: Rule = {
+      cond_count: 3,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]},
+         { predicate: "ancestor", arity: 2, args: [
+            { kind: 1, name: "Y" },
+            { kind: 1, name: "Z" }
+         ]},
+         { predicate: "neq", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Z" }
+         ]}
+      ],
+      action: { predicate: "ancestor", arity: 2, args: [
+         { kind: 1, name: "X" },
+         { kind: 1, name: "Z" }
+      ]}
+   };
+   add_rule(ancestor_recursive_example);
+
+   var descendant_example: Rule = {
+      cond_count: 1,
+      conditions: [
+         { predicate: "ancestor", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]}
+      ],
+      action: { predicate: "descendant", arity: 2, args: [
+         { kind: 1, name: "Y" },
+         { kind: 1, name: "X" }
+      ]}
+   };
+   add_rule(descendant_example);
+
+   var cousin_example: Rule = {
+      cond_count: 4,
+      conditions: [
+         { predicate: "grandparent", arity: 2, args: [
+            { kind: 1, name: "G" },
+            { kind: 1, name: "X" }
+         ]},
+         { predicate: "grandparent", arity: 2, args: [
+            { kind: 1, name: "G" },
+            { kind: 1, name: "Y" }
+         ]},
+         { predicate: "neq", arity: 2, args: [
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]},
+         { predicate: "not", arity: 3, args: [
+            { kind: 0, name: "sibling" },
+            { kind: 1, name: "X" },
+            { kind: 1, name: "Y" }
+         ]}
+      ],
+      action: { predicate: "cousin", arity: 2, args: [
+         { kind: 1, name: "X" },
+         { kind: 1, name: "Y" }
+      ]}
+   };
+   add_rule(cousin_example);
+
+   var mother_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "mother", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(mother_example);
+
+   var father_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "father", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(father_example);
+
+   var daughter_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "child", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "P" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "C" } ]}
+      ],
+      action: { predicate: "daughter", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "P" } ]}
+   };
+   add_rule(daughter_example);
+
+   var son_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "child", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "P" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "C" } ]}
+      ],
+      action: { predicate: "son", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "P" } ]}
+   };
+   add_rule(son_example);
+
+   var brother_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "sibling", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "brother", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(brother_example);
+
+   var sister_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "sibling", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "sister", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(sister_example);
+
+   var wife_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "wife", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(wife_example);
+
+   var husband_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "husband", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(husband_example);
+
+   var spouse_symmetry_example: Rule = {
+      cond_count: 1,
+      conditions: [
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+      ],
+      action: { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "Y" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(spouse_symmetry_example);
+
+   var grandmother_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "grandparent", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Z" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "grandmother", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Z" } ]}
+   };
+   add_rule(grandmother_example);
+
+   var grandfather_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "grandparent", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Z" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "grandfather", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Z" } ]}
+   };
+   add_rule(grandfather_example);
+
+   var granddaughter_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "grandchild", arity: 2, args: [ { kind: 1, name: "Z" }, { kind: 1, name: "X" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "Z" } ]}
+      ],
+      action: { predicate: "granddaughter", arity: 2, args: [ { kind: 1, name: "Z" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(granddaughter_example);
+
+   var grandson_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "grandchild", arity: 2, args: [ { kind: 1, name: "Z" }, { kind: 1, name: "X" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "Z" } ]}
+      ],
+      action: { predicate: "grandson", arity: 2, args: [ { kind: 1, name: "Z" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(grandson_example);
+
+   var aunt_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "aunt_uncle", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "aunt", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(aunt_example);
+
+   var uncle_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "aunt_uncle", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "uncle", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(uncle_example);
+
+   var niece_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "niece_nephew", arity: 2, args: [ { kind: 1, name: "Y" }, { kind: 1, name: "X" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "Y" } ]}
+      ],
+      action: { predicate: "niece", arity: 2, args: [ { kind: 1, name: "Y" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(niece_example);
+
+   var nephew_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "niece_nephew", arity: 2, args: [ { kind: 1, name: "Y" }, { kind: 1, name: "X" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "Y" } ]}
+      ],
+      action: { predicate: "nephew", arity: 2, args: [ { kind: 1, name: "Y" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(nephew_example);
+
+   var parent_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "parent", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "S" } ]},
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "S" }, { kind: 1, name: "Y" } ]}
+      ],
+      action: { predicate: "parent_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(parent_in_law_example);
+
+   var mother_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "parent_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "mother_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(mother_in_law_example);
+
+   var father_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "parent_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "father_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(father_in_law_example);
+
+   var child_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "child", arity: 2, args: [ { kind: 1, name: "S" }, { kind: 1, name: "Y" } ]},
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "S" } ]}
+      ],
+      action: { predicate: "child_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(child_in_law_example);
+
+   var daughter_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "child_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "daughter_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(daughter_in_law_example);
+
+   var son_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "child_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "son_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(son_in_law_example);
+
+   var sibling_in_law_example_v1: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "sibling", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "S" } ]},
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "S" }, { kind: 1, name: "Y" } ]}
+      ],
+      action: { predicate: "sibling_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(sibling_in_law_example_v1);
+
+   var sibling_in_law_example_v2: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "S" } ]},
+         { predicate: "sibling", arity: 2, args: [ { kind: 1, name: "S" }, { kind: 1, name: "Y" } ]}
+      ],
+      action: { predicate: "sibling_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(sibling_in_law_example_v2);
+
+   var sister_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "sibling_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "sister_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(sister_in_law_example);
+
+   var brother_in_law_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "sibling_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]}
+      ],
+      action: { predicate: "brother_in_law", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "Y" } ]}
+   };
+   add_rule(brother_in_law_example);
+
+   var stepchild_example: Rule = {
+      cond_count: 3,
+      conditions: [
+         { predicate: "child", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "P" } ]},
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "P" } ]},
+         { predicate: "not", arity: 3, args: [
+            { kind: 0, name: "child" },
+            { kind: 1, name: "C" },
+            { kind: 1, name: "X" }
+         ]}
+      ],
+      action: { predicate: "stepchild", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(stepchild_example);
+
+   var stepdaughter_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "stepchild", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "X" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "C" } ]}
+      ],
+      action: { predicate: "stepdaughter", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(stepdaughter_example);
+
+   var stepson_example: Rule = {
+      cond_count: 2,
+      conditions: [
+         { predicate: "stepchild", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "X" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "C" } ]}
+      ],
+      action: { predicate: "stepson", arity: 2, args: [ { kind: 1, name: "C" }, { kind: 1, name: "X" } ]}
+   };
+   add_rule(stepson_example);
+
+   var stepmother_example: Rule = {
+      cond_count: 4,
+      conditions: [
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "P" } ]},
+         { predicate: "parent", arity: 2, args: [ { kind: 1, name: "P" }, { kind: 1, name: "C" } ]},
+         { predicate: "female", arity: 1, args: [ { kind: 1, name: "X" } ]},
+         { predicate: "not", arity: 3, args: [
+            { kind: 0, name: "parent" },
+            { kind: 1, name: "X" },
+            { kind: 1, name: "C" }
+         ]}
+      ],
+      action: { predicate: "stepmother", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "C" } ]}
+   };
+   add_rule(stepmother_example);
+
+   var stepfather_example: Rule = {
+      cond_count: 4,
+      conditions: [
+         { predicate: "spouse", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "P" } ]},
+         { predicate: "parent", arity: 2, args: [ { kind: 1, name: "P" }, { kind: 1, name: "C" } ]},
+         { predicate: "male", arity: 1, args: [ { kind: 1, name: "X" } ]},
+         { predicate: "not", arity: 3, args: [
+            { kind: 0, name: "parent" },
+            { kind: 1, name: "X" },
+            { kind: 1, name: "C" }
+         ]}
+      ],
+      action: { predicate: "stepfather", arity: 2, args: [ { kind: 1, name: "X" }, { kind: 1, name: "C" } ]}
+   };
+   add_rule(stepfather_example);
+}

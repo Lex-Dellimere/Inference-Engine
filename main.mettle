@@ -1,0 +1,35 @@
+import "./IEngine";
+import "./example.mettle";
+import "std/io";
+
+fn main() -> int32 {
+
+   add_parent("alice", "bob");
+   add_parent("bob", "carol");
+   add_parent("carol", "dave");
+   add_parent("alice", "eve");
+   add_parent("eve", "frank");
+
+   add_female("alice");
+   add_female("eve");
+   add_female("carol");
+   add_female("grace");
+
+   add_male("bob");
+   add_male("dave");
+   add_male("frank");
+   add_male("henry");
+
+   add_spouse("bob", "grace");
+   add_spouse("carol", "henry");
+
+   add_family_rules();
+
+   set_trace_inference(0);
+
+   run_forward_chaining();
+
+   display_relationships();
+
+   return 0;
+}
